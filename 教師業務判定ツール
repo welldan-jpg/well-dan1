@@ -397,7 +397,7 @@
             'anthropic-dangerous-direct-browser-access': 'true',
           },
           body: JSON.stringify({
-            model: 'claude-sonnet-4-20250514',
+            model: 'claude-3-5-sonnet-latest', // ★修正箇所：実在する正しいモデル名に変更しました
             max_tokens: 512,
             messages: [{
               role: 'user',
