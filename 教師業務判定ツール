@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teacher Task Classifier</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --bg-secondary: #f5f5f3;
+      --text-primary: #1a1a18;
+      --text-secondary: #6b6b67;
+      --text-tertiary: #a8a8a4;
+      --border: rgba(0,0,0,0.12);
+      --border-hover: rgba(0,0,0,0.25);
+      --border-focus: rgba(0,0,0,0.4);
+      --radius-md: 8px;
+      --radius-lg: 12px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1a18;
+        --bg-secondary: #242422;
+        --text-primary: #f0ede8;
+        --text-secondary: #8a8a84;
+        --text-tertiary: #55554f;
+        --border: rgba(255,255,255,0.1);
+        --border-hover: rgba(255,255,255,0.22);
+        --border-focus: rgba(255,255,255,0.38);
+      }
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: 'DM Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1.5rem 5rem;
+      min-height: 100vh;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 580px;
+    }
+
+    /* ── Header ── */
+    header {
+      margin-bottom: 2.5rem;
+    }
+
+    header h1 {
+      font-size: 22px;
+      font-weight: 400;
+      letter-spacing: -0.03em;
+      color: var(--text-primary);
+      margin-bottom: 5px;
+    }
+
+    header p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    /* ── Textarea ── */
+    textarea {
+      width: 100%;
+      min-height: 130px;
+      padding: 14px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--text-primary);
+      background: var(--bg);
+      border: 0.5px solid var(--border-hover);
+      border-radius: var(--radius-lg);
+      resize: vertical;
+      outline: none;
+      line-height: 1.65;
+      transition: border-color 0.15s;
+    }
+
+    textarea:focus {
+      border-color: var(--border-focus);
+    }
+
+    textarea::placeholder {
+      color: var(--text-tertiary);
+      font-weight: 300;
+    }
+
+    /* ── API Key input ── */
+    .api-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      margin-bottom: 12px;
+    }
+
+    .api-row label {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .api-row input[type="password"] {
+      flex: 1;
+      height: 34px;
+      padding: 0 12px;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .api-row input[type="password"]:focus {
+      border-color: var(--border-focus);
+    }
+
+    .api-row input[type="password"]::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    /* ── Button ── */
+    .btn-run {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 20px;
+      background: var(--text-primary);
+      color: var(--bg);
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      letter-spacing: -0.01em;
+    }
+
+    .btn-run:hover  { opacity: 0.72; }
+    .btn-run:active { opacity: 0.5; transform: scale(0.985); }
+    .btn-run:disabled { opacity: 0.32; cursor: default; }
+
+    .spinner {
+      width: 14px; height: 14px;
+      border: 1.5px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.65s linear infinite;
+      display: none;
+    }
+    .loading .spinner { display: block; }
+    .loading .btn-label { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Result ── */
+    .result-area {
+      margin-top: 1.75rem;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .result-area.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .divider {
+      height: 0.5px;
+      background: var(--border);
+      margin-bottom: 1.25rem;
+    }
+
+    .category-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 13px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 0.5px solid;
+      margin-bottom: 0.85rem;
+      letter-spacing: 0.01em;
+    }
+
+    /* light mode category colors */
+    .cat-instruction   { background:#E6F1FB; color:#0C447C; border-color:#85B7EB; }
+    .cat-assessment    { background:#FAEEDA; color:#633806; border-color:#EF9F27; }
+    .cat-admin         { background:#EAF3DE; color:#27500A; border-color:#97C459; }
+    .cat-communication { background:#EEEDFE; color:#3C3489; border-color:#AFA9EC; }
+    .cat-planning      { background:#E1F5EE; color:#085041; border-color:#5DCAA5; }
+    .cat-other         { background:var(--bg-secondary); color:var(--text-secondary); border-color:var(--border-hover); }
+
+    @media (prefers-color-scheme: dark) {
+      .cat-instruction   { background:#042C53; color:#B5D4F4; border-color:#185FA5; }
+      .cat-assessment    { background:#412402; color:#FAC775; border-color:#BA7517; }
+      .cat-admin         { background:#173404; color:#C0DD97; border-color:#3B6D11; }
+      .cat-communication { background:#26215C; color:#CECBF6; border-color:#534AB7; }
+      .cat-planning      { background:#04342C; color:#9FE1CB; border-color:#0F6E56; }
+    }
+
+    .result-reason {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .tag {
+      padding: 4px 10px;
+      background: var(--bg-secondary);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ── History ── */
+    .history-section {
+      margin-top: 2rem;
+      display: none;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.75rem;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-md);
+      border: 0.5px solid transparent;
+      cursor: pointer;
+      transition: border-color 0.12s, background 0.12s;
+    }
+    .history-item:hover {
+      background: var(--bg);
+      border-color: var(--border);
+    }
+
+    .h-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .h-text {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .h-cat {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      white-space: nowrap;
+    }
+
+    /* ── Error ── */
+    .error-msg {
+      font-size: 13px;
+      color: #A32D2D;
+      margin-top: 8px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 4rem;
+      font-size: 11px;
+      color: var(--text-tertiary);
+      text-align: center;
+      font-family: 'DM Mono', monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>task classifier</h1>
+      <p>先生のタスクをAIで自動分類します</p>
+    </header>
+
+    <textarea id="taskInput" placeholder="タスクを入力してください&#10;例：3年生の理科テストの採点をする&#10;例：保護者に来週の遠足についてメールを送る"></textarea>
+
+    <div class="api-row">
+      <label>API KEY</label>
+      <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off" />
+    </div>
+
+    <button class="btn-run" id="runBtn" onclick="classify()">
+      <span class="spinner"></span>
+      <span class="btn-label">分類する</span>
+    </button>
+
+    <p class="error-msg" id="errorMsg" style="display:none;"></p>
+
+    <div class="result-area" id="resultArea">
+      <div class="divider"></div>
+      <div class="category-badge" id="categoryBadge"></div>
+      <p class="result-reason" id="resultReason"></p>
+      <div class="tags" id="resultTags"></div>
+    </div>
+
+    <div class="history-section" id="historySection">
+      <div class="divider"></div>
+      <p class="section-label">履歴</p>
+      <div class="history-list" id="historyList"></div>
+    </div>
+
+    <footer>teacher task classifier &nbsp;·&nbsp; powered by claude</footer>
+  </div>
+
+  <script>
+    const CATEGORIES = {
+      instruction:   { ja: '授業・指導',   dot: '#378ADD' },
+      assessment:    { ja: '評価・採点',   dot: '#EF9F27' },
+      admin:         { ja: '事務・書類',   dot: '#639922' },
+      communication: { ja: '保護者・連絡', dot: '#7F77DD' },
+      planning:      { ja: '計画・準備',   dot: '#1D9E75' },
+      other:         { ja: 'その他',       dot: '#888780' },
+    };
+
+    const history = [];
+
+    function showError(msg) {
+      const el = document.getElementById('errorMsg');
+      el.textContent = msg;
+      el.style.display = 'block';
+      setTimeout(() => { el.style.display = 'none'; }, 4000);
+    }
+
+    async function classify() {
+      const input   = document.getElementById('taskInput').value.trim();
+      const apiKey  = document.getElementById('apiKey').value.trim();
+      const btn     = document.getElementById('runBtn');
+
+      if (!input)  { showError('タスクを入力してください。'); return; }
+      if (!apiKey) { showError('Anthropic API キーを入力してください。'); return; }
+
+      btn.classList.add('loading');
+      btn.disabled = true;
+      document.getElementById('resultArea').classList.remove('visible');
+
+      try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true',
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 512,
+            messages: [{
+              role: 'user',
+              content: `あなたは学校の先生のタスクを分類するアシスタントです。
+以下のタスクを分析し、必ずJSON形式のみで返してください。前置きや説明は不要です。
+
+タスク: "${input}"
+
+分類カテゴリ（1つ選択）:
+- instruction: 授業・指導・生徒への直接的な教育活動
+- assessment: 評価・採点・テスト作成・成績管理
+- admin: 事務・書類・記録・報告書
+- communication: 保護者・同僚・外部との連絡・メール・面談
+- planning: 授業計画・カリキュラム・行事の準備
+- other: 上記に当てはまらないもの
+
+返すJSON:
+{
+  "category": "カテゴリキー",
+  "reason": "分類した理由（1文、40字以内）",
+  "tags": ["キーワード1", "キーワード2", "キーワード3"],
+  "priority": "high|medium|low"
+}`
+            }]
+          })
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err?.error?.message || `HTTP ${res.status}`);
+        }
+
+        const data   = await res.json();
+        const text   = data.content.map(b => b.text || '').join('');
+        const clean  = text.replace(/```json|```/g, '').trim();
+        const parsed = JSON.parse(clean);
+
+        renderResult(parsed);
+        addHistory(input, parsed.category);
+
+      } catch (e) {
+        showError('分類に失敗しました：' + (e.message || 'もう一度お試しください'));
+      }
+
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+
+    function renderResult(parsed) {
+      const cat    = CATEGORIES[parsed.category] || CATEGORIES.other;
+      const badge  = document.getElementById('categoryBadge');
+      badge.className  = `category-badge cat-${parsed.category || 'other'}`;
+      badge.textContent = cat.ja;
+
+      document.getElementById('resultReason').textContent = parsed.reason || '';
+
+      const tagsEl = document.getElementById('resultTags');
+      tagsEl.innerHTML = '';
+
+      (parsed.tags || []).forEach(t => {
+        const s = document.createElement('span');
+        s.className   = 'tag';
+        s.textContent = t;
+        tagsEl.appendChild(s);
+      });
+
+      if (parsed.priority) {
+        const pMap = { high: '優先度：高', medium: '優先度：中', low: '優先度：低' };
+        const s = document.createElement('span');
+        s.className   = 'tag';
+        s.textContent = pMap[parsed.priority] || parsed.priority;
+        tagsEl.appendChild(s);
+      }
+
+      requestAnimationFrame(() => {
+        document.getElementById('resultArea').classList.add('visible');
+      });
+    }
+
+    function addHistory(text, category) {
+      const cat = CATEGORIES[category] || CATEGORIES.other;
+      history.unshift({ text, category, catJa: cat.ja, dot: cat.dot });
+      if (history.length > 6) history.pop();
+
+      const section = document.getElementById('historySection');
+      section.style.display = 'block';
+
+      const list = document.getElementById('historyList');
+      list.innerHTML = '';
+      history.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.innerHTML = `
+          <div class="h-dot" style="background:${item.dot}"></div>
+          <span class="h-text">${escHtml(item.text)}</span>
+          <span class="h-cat">${item.catJa}</span>
+        `;
+        div.addEventListener('click', () => {
+          document.getElementById('taskInput').value = item.text;
+        });
+        list.appendChild(div);
+      });
+    }
+
+    function escHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    document.getElementById('taskInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) classify();
+    });
+  </script>
+</body>
+</html>
