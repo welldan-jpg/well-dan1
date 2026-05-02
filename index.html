@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教師業務判定アプリ - GitHub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+        
+        .badge-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        
+        .content {
+            padding: 60px 40px;
+        }
+        
+        section {
+            margin-bottom: 50px;
+        }
+        
+        h2 {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            display: inline-block;
+        }
+        
+        h3 {
+            font-size: 1.3em;
+            color: #764ba2;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            font-size: 1em;
+            line-height: 1.8;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .feature-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 25px;
+            border-radius: 8px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.1);
+        }
+        
+        .feature-card h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .feature-card p {
+            margin-bottom: 0;
+            color: #555;
+            font-size: 0.95em;
+        }
+        
+        .step-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .step-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .step-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        .step-number {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+        
+        .step-card h4 {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .step-card p {
+            margin-bottom: 0;
+            font-size: 0.95em;
+            line-height: 1.7;
+        }
+        
+        .tech-stack {
+            background: #f0f4ff;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .tech-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .tech-item {
+            background: white;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border-left: 3px solid #764ba2;
+            font-size: 0.95em;
+        }
+        
+        .cta-container {
+            text-align: center;
+            margin-top: 50px;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            color: white;
+        }
+        
+        .cta-container h3 {
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 10px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+        
+        footer {
+            background: #f8f9fa;
+            padding: 30px 40px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            padding: 20px;
+            border-left: 4px solid #ffc107;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        
+        .highlight strong {
+            color: #856404;
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                padding: 40px 20px;
+            }
+            
+            header h1 {
+                font-size: 1.8em;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+            
+            h2 {
+                font-size: 1.4em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 教師業務判定アプリ</h1>
+            <p>文部科学省の業務分類に基づいて、教師の業務の要否を判定するモバイルアプリケーション</p>
+            <div class="badge-container">
+                <span class="badge">React Native</span>
+                <span class="badge">Expo</span>
+                <span class="badge">TypeScript</span>
+                <span class="badge">教育DX</span>
+            </div>
+        </header>
+        
+        <div class="content">
+            <!-- 概要セクション -->
+            <section>
+                <h2>プロジェクト概要</h2>
+                <p>このアプリケーションは、教師が日々の業務を入力することで、文部科学省が示す「学校と教師の業務の3分類」に基づいて、その業務が教師が担うべきものか、検討の余地があるか、または委譲可能かを判定します。</p>
+                <p>判定結果には詳細な理由とアドバイスが表示され、教師のウェルビーイング向上と業務最適化を支援します。</p>
+            </section>
+            
+            <!-- 実装内容セクション -->
+            <section>
+                <h2>✨ 実装内容</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🎯 業務判定機能</h4>
+                        <p>ホーム画面で業務名を入力すると、文科省の「学校と教師の業務の3分類」に基づいて判定を行います。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📊 判定結果表示</h4>
+                        <p>判定結果画面で詳細な理由とアドバイスを表示。ステータスに応じた色分け表示で直感的に理解できます。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📝 履歴管理</h4>
+                        <p>判定履歴はローカルストレージに自動保存。過去の判定結果を確認・削除できます。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🔗 研修案内</h4>
+                        <p>判定結果からWellDAN研修プログラムへの導線を提供。研修との連携で行動変容を促進します。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>📧 メール送信</h4>
+                        <p>判定レポートをメール形式で生成・送信。個人情報の取り扱いについての詳細な但し書きを表示。</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>✅ テスト完備</h4>
+                        <p>業務判定ロジックのユニットテスト17件が全てパス。各画面のナビゲーションも正常に機能。</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 技術スタックセクション -->
+            <section>
+                <h2>🛠️ 技術スタック</h2>
+                <div class="tech-stack">
+                    <p><strong>フロントエンド：</strong>React Native、Expo、TypeScript、NativeWind（Tailwind CSS）</p>
+                    <p><strong>バックエンド：</strong>Node.js、Express、tRPC</p>
+                    <p><strong>データベース：</strong>PostgreSQL、Drizzle ORM</p>
+                    <p><strong>テスト：</strong>Vitest、ユニットテスト</p>
+                    <div class="tech-list">
+                        <div class="tech-item">React Native 0.81</div>
+                        <div class="tech-item">Expo SDK 54</div>
+                        <div class="tech-item">TypeScript 5.9</div>
+                        <div class="tech-item">NativeWind 4</div>
+                        <div class="tech-item">tRPC 11.7</div>
+                        <div class="tech-item">Drizzle ORM 0.44</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 次のステップセクション -->
+            <section>
+                <h2>🚀 次のステップ</h2>
+                <p>アプリケーションの機能をさらに拡張するための提案です。</p>
+                <div class="step-container">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h4>AI連携による判定精度向上</h4>
+                        <p>現在のキーワードマッチングをサーバー側のLLM（大規模言語モデル）に置き換えることで、より自然な業務名の入力に対応し、判定精度を大幅に向上させることができます。</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h4>業務削減プランの自動生成</h4>
+                        <p>判定結果に基づいて、教師個人の業務削減プランを自動生成し、具体的なアクションアイテムと期限を提示する機能を追加することで、研修後の行動変容を促進できます。</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h4>学校全体の業務分析ダッシュボード</h4>
+                        <p>複数の教師の判定結果を集約し、学校全体の業務分布を可視化するダッシュボード機能を実装することで、管理職の業務改善計画立案をサポートできます。</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 注記セクション -->
+            <section>
+                <div class="highlight">
+                    <strong>⚠️ 重要な注記：</strong>
+                    <p>このアプリケーションは参考情報です。学校の実情に応じて、最終的な判断は学校管理職と相談の上で行ってください。判定結果は文部科学省の指針に基づいていますが、個別の状況によって判断が異なる場合があります。</p>
+                </div>
+            </section>
+            
+            <!-- CTA セクション -->
+            <div class="cta-container">
+                <h3>プロジェクトに参加する</h3>
+                <p style="margin-bottom: 20px;">このプロジェクトは、教師のウェルビーイング向上と教育の質の向上を目指しています。</p>
+                <a href="https://github.com" class="btn">GitHubで見る</a>
+                <a href="#" class="btn btn-secondary">ドキュメントを読む</a>
+            </div>
+        </div>
+        
+        <footer>
+            <p>&copy; 2026 教師業務判定アプリ プロジェクト | 文部科学省の業務分類に基づいて開発</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">このプロジェクトは教育の質向上と教師のウェルビーイング向上を目指しています。</p>
+        </footer>
+    </div>
+</body>
+</html>
